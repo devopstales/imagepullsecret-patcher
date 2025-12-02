@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "imagepullsecret-patcher.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+    helm.sh/chart: {{ include "imagepullsecret-patcher.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "imagepullsecret-patcher.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+    helm.sh/chart: {{ include "imagepullsecret-patcher.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "imagepullsecret-patcher.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+    helm.sh/chart: {{ include "imagepullsecret-patcher.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "imagepullsecret-patcher.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "imagepullsecret-patcher.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io

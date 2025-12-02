@@ -1,0 +1,49 @@
+# -- Container image registry, name, and tag
+image:
+  # -- Repository path (e.g. ghcr.io/your-org/imagepullsecret-patcher)
+  repository: ghcr.io/your-org/imagepullsecret-patcher
+  # -- Image tag to use (e.g. v0.1.0, latest)
+  tag: latest
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets for the controller Pod (if using private registry for the controller image)
+# @default -- `[]`
+imagePullSecrets: []
+
+# -- Comma-separated list of Kubernetes secret names to inject as imagePullSecrets into ServiceAccounts
+# These secrets must already exist in each target namespace (e.g., replicated via mittwald/kubernetes-replicator).
+registrySecretNames: "docker-registry"
+
+# -- If true, patch **all** ServiceAccounts in every namespace.
+# If false, only patch ServiceAccounts listed in `serviceAccounts` (not yet implemented) or `"default"`.
+# ⚠️ Setting this to `true` may impact many ServiceAccounts.
+patchAllServiceAccounts: false
+
+# -- Run the patcher once and exit (useful for CronJob mode).
+runOnce: false
+
+# -- If true, overwrite `imagePullSecrets` even if they already match.
+force: true
+
+# -- If true, only patch ServiceAccounts that already contain at least one of the `registrySecretNames`.
+managedOnly: false
+
+# -- Interval (in seconds) between reconciliation loops (ignored if `runOnce: true`).
+loopInterval: 30
+
+# -- Resource requests and limits for the controller Pod.
+# @default -- `{}` (no limits)
+resources: {}
+
+# -- Node selector for controller Pod placement.
+# @default -- `{}`
+nodeSelector: {}
+
+# -- Tolerations for controller Pod.
+# @default -- `[]`
+tolerations: []
+
+# -- Affinity rules for controller Pod.
+# @default -- `{}`
+affinity: {}

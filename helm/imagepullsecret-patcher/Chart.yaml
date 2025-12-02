@@ -1,0 +1,10 @@
+apiVersion: v2
+name: imagepullsecret-patcher
+description: Patch ImagePullSecrets to ServiceAccounts cluster-wide
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/devopstales/imagepullsecret-patcher
+maintainers:
+  - name: Páldi Balázs
+    email: devopstales2@gmail.com

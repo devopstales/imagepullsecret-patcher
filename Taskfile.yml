@@ -1,0 +1,69 @@
+version: '3'
+
+vars:
+  IMAGE_NAME: imagepullsecret-patcher
+  REGISTRY: devopstales
+  SECRET_NAMES: docker-registry
+
+tasks:
+  default:
+    desc: "Print Help"
+    cmds:
+      - "task --list-all"
+
+  # Install dependencies
+  install:
+    desc: Install Python dependencies with Poetry
+    cmds:
+      - poetry install
+
+  # Run locally (with auto kubeconfig detection)
+  run:
+    desc: Run the patcher locally (one-time by default)
+    deps: [install]
+    env:
+      REGISTRY_SECRET_NAMES: '{{ .SECRET_NAMES }}'
+      RUN_ONCE: '{{ or .RUN_ONCE "true" }}'
+      PATCH_ALL_SERVICEACCOUNTS: '{{ or .PATCH_ALL_SERVICEACCOUNTS "false" }}'
+      FORCE: '{{ or .FORCE "true" }}'
+      MANAGEDONLY: '{{ or .MANAGEDONLY "false" }}'
+      LOOP_INTERVAL: '{{ or .LOOP_INTERVAL "10" }}'
+    cmds:
+      - poetry run python imagepullsecret-patcher.py
+
+  # Build Docker image (linux/amd64 + linux/arm64)
+  build:
+    desc: Build multi-arch Docker image
+    cmds:
+      - docker buildx build
+          --platform linux/amd64,linux/arm64
+          --tag {{ .REGISTRY }}/{{ .IMAGE_NAME }}:latest
+          --tag {{ .REGISTRY }}/{{ .IMAGE_NAME }}:{{ .VERSION | default "dev" }}
+          --file Dockerfile
+          --load .
+
+  # Build and push
+  build-and-push:
+    desc: Build and push multi-arch image
+    cmds:
+      - docker buildx build
+          --platform linux/amd64,linux/arm64
+          --tag {{ .REGISTRY }}/{{ .IMAGE_NAME }}:latest
+          --tag {{ .REGISTRY }}/{{ .IMAGE_NAME }}:{{ .VERSION | default "dev" }}
+          --file Dockerfile
+          --push
+          .
+
+  # Run as continuous watcher locally (not one-time)
+  watch:
+    desc: Run locally in continuous mode (loop every 10s)
+    deps: [install]
+    env:
+      REGISTRY_SECRET_NAMES: '{{ .SECRET_NAMES }}'
+      RUN_ONCE: "false"
+      PATCH_ALL_SERVICEACCOUNTS: "false"
+      FORCE: "true"
+      MANAGEDONLY: "false"
+      LOOP_INTERVAL: "10"
+    cmds:
+      - poetry run python imagepullsecret-patcher.py

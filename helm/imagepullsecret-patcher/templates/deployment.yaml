@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "imagepullsecret-patcher.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+    helm.sh/chart: {{ include "imagepullsecret-patcher.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "imagepullsecret-patcher.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "imagepullsecret-patcher.fullname" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: patcher
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: REGISTRY_SECRET_NAMES
+              value: {{ .Values.registrySecretNames | quote }}
+            - name: PATCH_ALL_SERVICEACCOUNTS
+              value: {{ .Values.patchAllServiceAccounts | quote }}
+            - name: RUN_ONCE
+              value: {{ .Values.runOnce | quote }}
+            - name: FORCE
+              value: {{ .Values.force | quote }}
+            - name: MANAGEDONLY
+              value: {{ .Values.managedOnly | quote }}
+            - name: LOOP_INTERVAL
+              value: {{ .Values.loopInterval | quote }}
+          {{- with .Values.resources }}
+          resources: {{ toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}

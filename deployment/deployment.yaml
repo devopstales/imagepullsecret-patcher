@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imagepullsecret-patcher
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: imagepullsecret-patcher
+  template:
+    metadata:
+      labels:
+        app: imagepullsecret-patcher
+    spec:
+      serviceAccountName: imagepullsecret-patcher
+      containers:
+      - name: patcher
+        image: devopstales/imagepullsecret-patcher:latest
+        env:
+        - name: REGISTRY_SECRET_NAMES
+          value: "docker-registry"
+        - name: PATCH_ALL_SERVICEACCOUNTS
+          value: "false"
+        - name: FORCE
+          value: "true"
+        - name: MANAGEDONLY
+          value: "false"
+        - name: LOOP_INTERVAL
+          value: "30"
+        # - name: RUN_ONCE
+        #   value: "true"  # if used as Job/CronJob
