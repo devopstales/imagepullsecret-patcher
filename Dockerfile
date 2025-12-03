@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 
-
+LABEL org.opencontainers.image.source=https://github.com/devopstales/imagepullsecret-patcher
+LABEL org.opencontainers.image.description="Pull secret patcher"
+LABEL org.opencontainers.image.licenses=Apache
 
 WORKDIR /app
 COPY requirements.txt .

@@ -75,6 +75,8 @@ tasks:
           --tag {{ .REGISTRY2 }}/{{ .IMAGE_NAME }}:latest
           --tag {{ .REGISTRY2 }}/{{ .IMAGE_NAME }}:{{ .VERSION | default "dev" }}
           --file Dockerfile
+          --attest type=sbom
+          --sbom=true
           --load .
 
   # Build and push
@@ -88,6 +90,8 @@ tasks:
           --tag {{ .REGISTRY2 }}/{{ .IMAGE_NAME }}:latest
           --tag {{ .REGISTRY2 }}/{{ .IMAGE_NAME }}:{{ .VERSION | default "dev" }}
           --file Dockerfile
+          --attest type=sbom
+          --sbom=true
           --push .
 
   docker-scan:
