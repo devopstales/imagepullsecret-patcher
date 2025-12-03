@@ -1,10 +1,10 @@
+import logging
 import os
 import sys
 import time
-import logging
-from typing import List, Set
+from typing import List
+
 from kubernetes import client, config
-from kubernetes.config.config_exception import ConfigException
 from kubernetes.client.rest import ApiException
 
 # --- Logging ---
